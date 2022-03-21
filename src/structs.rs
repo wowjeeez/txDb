@@ -2,6 +2,7 @@
 
 #[deny(clippy::all)]
 use serde::{Deserialize, Serialize};
+use crate::Database;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Revocation {
@@ -51,9 +52,9 @@ pub struct PendingWl {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct TableLayout {
-    players: Vec<Player>,
-    actions: Vec<Action>,
-    pendingWL: Vec<PendingWl>
+    pub players: Vec<Player>,
+    pub actions: Vec<Action>,
+    pub pendingWL: Vec<PendingWl>,
 }
 
 impl TableLayout {
@@ -68,9 +69,9 @@ impl TableLayout {
     }
 }
 #[derive(Debug)]
-pub struct Players<'a>(pub &'a Vec<Player>);
+pub struct Players<'a>(pub &'a mut Vec<Player>);
 #[derive(Debug)]
-pub struct Actions<'a>(pub &'a Vec<Action>);
+pub struct Actions<'a>(pub &'a mut Vec<Action>);
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct BanQuery {

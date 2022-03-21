@@ -1,3 +1,5 @@
+use std::sync::MutexGuard;
+use crate::{Database, get_db};
 use crate::structs::{Player, Players};
 
 impl Players<'_> {
@@ -17,5 +19,9 @@ impl Players<'_> {
     }
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+    pub fn add(&mut self, player: Player, guard: MutexGuard<Database>) {
+        drop(guard);
+        get_db().push_player(player);
     }
 }

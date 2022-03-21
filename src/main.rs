@@ -8,16 +8,35 @@ mod action;
 use warp::Filter;
 use crate::db::{Database};
 
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Instant;
-use crate::structs::HttpReqBody;
+use lazy_static::lazy_static;
+use crate::structs::{HttpReqBody, Player};
+
+lazy_static! {
+    static ref state: Arc<Mutex<Database>> = Arc::new(Mutex::new(Database::new("test.json")));
+}
 
 #[tokio::main]
 async fn main() {
     let now = Instant::now();
-    let db = Database::new("mock.json");
     println!("Database parsed in {} ms", now.elapsed().as_millis());
-    let state = Arc::new(Mutex::new(db));
+    /*
+    let mut db = state.lock().unwrap();
+    db.push_player(serde_json::from_str(r#"  {
+    "license": "9b9fc300cc65d22ad3b536175a4d15c0e4933753",
+    "name": "Tabarra",
+    "playTime": 4591,
+    "tsJoined": 1590812869,
+    "tsLastConnection": 1632671882,
+    "notes": {
+      "text": "",
+      "lastAdmin": null,
+      "tsLastEdit": null
+    }
+  }"#).unwrap());
+    drop(db);
+     */
     let routes = warp::path("fetch").and(warp::body::bytes()).map(move |bytes: bytes::Bytes| {
         let now = Instant::now();
         let bvec = bytes.to_vec();
@@ -28,6 +47,7 @@ async fn main() {
         } else if parsed.action == "GET_ACTIONS" {
             let pload = parsed.get.unwrap_or(vec![]);
             let mut lock = state.lock().unwrap();
+            dbg!(&lock);
             let actions = lock.get_tbls().get_actions();
             let res = actions.get_by_idents(pload);
             format!(r#""status": "ok", "took": {}, "resp": {}"#, now.elapsed().as_nanos(), serde_json::to_string(&res).unwrap())
@@ -36,4 +56,8 @@ async fn main() {
         }
     });
     warp::serve(routes).run(([127, 0, 0, 1], 40121)).await;
+}
+
+pub fn get_db<'a>() -> MutexGuard<'a, Database> {
+    state.lock().unwrap()
 }
