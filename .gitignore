@@ -1,0 +1,6 @@
+/target
+node_modules
+test.json
+mock.json
+.idea
+*.exe
