@@ -1,7 +1,7 @@
 use std::fs::{File, OpenOptions};
 use std::io::{BufReader, Read, Write};
 use std::path::PathBuf;
-use crate::{get_db, Player};
+use crate::{Player};
 use crate::structs::{Action, PendingWl, TableLayout};
 #[derive(Debug)]
 pub struct Database {

@@ -13,9 +13,6 @@ use std::time::Instant;
 use lazy_static::lazy_static;
 use crate::structs::{HttpReqBody, Player};
 
-lazy_static! {
-    static ref state: Arc<Mutex<Database>> = Arc::new(Mutex::new(Database::new("test.json")));
-}
 
 #[tokio::main]
 async fn main() {
@@ -37,6 +34,7 @@ async fn main() {
   }"#).unwrap());
     drop(db);
      */
+    let state = Arc::new(Mutex::new(Database::new("test.json")));
     let routes = warp::path("fetch").and(warp::body::bytes()).map(move |bytes: bytes::Bytes| {
         let now = Instant::now();
         let bvec = bytes.to_vec();
@@ -47,7 +45,6 @@ async fn main() {
         } else if parsed.action == "GET_ACTIONS" {
             let pload = parsed.get.unwrap_or(vec![]);
             let mut lock = state.lock().unwrap();
-            dbg!(&lock);
             let actions = lock.get_tbls().get_actions();
             let res = actions.get_by_idents(pload);
             format!(r#""status": "ok", "took": {}, "resp": {}"#, now.elapsed().as_nanos(), serde_json::to_string(&res).unwrap())
@@ -56,8 +53,4 @@ async fn main() {
         }
     });
     warp::serve(routes).run(([127, 0, 0, 1], 40121)).await;
-}
-
-pub fn get_db<'a>() -> MutexGuard<'a, Database> {
-    state.lock().unwrap()
 }

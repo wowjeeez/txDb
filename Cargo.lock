@@ -869,7 +869,6 @@ name = "txDb"
 version = "0.1.0"
 dependencies = [
  "bytes",
- "lazy_static",
  "serde",
  "serde_json",
  "tokio",
